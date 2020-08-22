@@ -1,6 +1,6 @@
 from program import Program
-
-def ds_compile(circ_obj, circ_type, shots):
+import numpy as np
+def ds_compile(circ_obj, circ_type, shots=1):
     if (circ_type == "ibm"):
         return ds_compile_ibm(circ_obj,shots=1)
     if (circ_type == "rigetti"):
@@ -325,7 +325,7 @@ def ds_compile_ibm(circ_obj,shots=1):
 
 def ds_compile_rigetti(circ_obj,shots=1):
     import pyquil
-    from pyquil.gates import *
+    from pyquil.gates import RX, RZ, CZ, MEASURE
     from pyquil.api import get_qc
     nqubits=len(circ_obj.get_qubits())
     lineList = [str(instr) for instr in circ_obj]

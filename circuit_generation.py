@@ -1,9 +1,18 @@
 #import necessary libraries
 import numpy as np
 import matplotlib.pyplot as plt
-from program import Program
+import program
 from ds_compiler import ds_compile
 
+#IBM imports 
+import qiskit as qk
+from qiskit.tools.monitor import job_monitor
+from qiskit.visualization import plot_histogram, plot_gate_map, plot_circuit_layout
+from qiskit import Aer, IBMQ, execute
+from qiskit.providers.aer import noise
+from qiskit.providers.aer.noise import NoiseModel
+from qiskit.circuit import quantumcircuit
+from qiskit.circuit import Instruction
 
 #Rigettti imports
 import pyquil
@@ -156,7 +165,7 @@ class Heisenberg:
     def local_evolution_circuit(self,evol_time): #creates evolution circuit in local program
     #Initial flipped spins are not implemented in this function due to the need for "barrier". Need to do that outside of this.
         prop_steps = int(evol_time / self.delta_t)  # number of propagation steps
-        P=Program(self.num_qubits)
+        P=program.Program(self.num_qubits)
         for step in range(prop_steps):
             t = (step + 0.5) * self.delta_t
             if "n" in self.time_dep_flag:
@@ -176,35 +185,35 @@ class Heisenberg:
             ZZ_instr_set=[]
             for q in range(self.num_qubits):
                 if self.ext_dir in "X":
-                    ext_instr_set.append(Gate('RX', [q], angles=[psi_ext]))
+                    ext_instr_set.append(program.Gate('RX', [q], angles=[psi_ext]))
                 elif self.ext_dir in "Y":
-                    ext_instr_set.append(Gate('RY', [q], angles=[psi_ext]))
+                    ext_instr_set.append(program.Gate('RY', [q], angles=[psi_ext]))
                 elif self.ext_dir in "Z":
-                    ext_instr_set.append(Gate('RZ', [q], angles=[psi_ext]))
+                    ext_instr_set.append(program.Gate('RZ', [q], angles=[psi_ext]))
             psiX=-2.0*(self.JX)*self.delta_t/self.H_BAR
             psiY=-2.0*(self.JY)*self.delta_t/self.H_BAR
             psiZ=-2.0*(self.JZ)*self.delta_t/self.H_BAR
 
             for q in range(self.num_qubits-1):
-                XX_instr_set.append(Gate('H',[q]))
-                XX_instr_set.append(Gate('H',[q+1]))
-                XX_instr_set.append(Gate('CNOT',[q, q+1]))
-                XX_instr_set.append(Gate('RZ', [q+1], angles=[psiX]))
-                XX_instr_set.append(Gate('CNOT',[q, q+1]))
-                XX_instr_set.append(Gate('H',[q]))
-                XX_instr_set.append(Gate('H',[q+1]))
+                XX_instr_set.append(program.Gate('H',[q]))
+                XX_instr_set.append(program.Gate('H',[q+1]))
+                XX_instr_set.append(program.Gate('CNOT',[q, q+1]))
+                XX_instr_set.append(program.Gate('RZ', [q+1], angles=[psiX]))
+                XX_instr_set.append(program.Gate('CNOT',[q, q+1]))
+                XX_instr_set.append(program.Gate('H',[q]))
+                XX_instr_set.append(program.Gate('H',[q+1]))
 
-                YY_instr_set.append(Gate('RX',[q],angles=[-np.pi/2]))
-                YY_instr_set.append(Gate('RX',[q+1],angles=[-np.pi/2]))
-                YY_instr_set.append(Gate('CNOT',[q, q+1]))
-                YY_instr_set.append(Gate('RZ', [q+1], angles=[psiY]))
-                YY_instr_set.append(Gate('CNOT',[q, q+1]))
-                YY_instr_set.append(Gate('RX',[q],angles=[np.pi/2]))
-                YY_instr_set.append(Gate('RX',[q+1],angles=[np.pi/2]))
+                YY_instr_set.append(program.Gate('RX',[q],angles=[-np.pi/2]))
+                YY_instr_set.append(program.Gate('RX',[q+1],angles=[-np.pi/2]))
+                YY_instr_set.append(program.Gate('CNOT',[q, q+1]))
+                YY_instr_set.append(program.Gate('RZ', [q+1], angles=[psiY]))
+                YY_instr_set.append(program.Gate('CNOT',[q, q+1]))
+                YY_instr_set.append(program.Gate('RX',[q],angles=[np.pi/2]))
+                YY_instr_set.append(program.Gate('RX',[q+1],angles=[np.pi/2]))
 
-                ZZ_instr_set.append(Gate('CNOT',[q, q+1]))
-                ZZ_instr_set.append(Gate('RZ', [q+1], angles=[psiZ]))
-                ZZ_instr_set.append(Gate('CNOT',[q, q+1]))
+                ZZ_instr_set.append(program.Gate('CNOT',[q, q+1]))
+                ZZ_instr_set.append(program.Gate('RZ', [q+1], angles=[psiZ]))
+                ZZ_instr_set.append(program.Gate('CNOT',[q, q+1]))
 
             if self.h_ext != 0:
                 P.add_instr(ext_instr_set)

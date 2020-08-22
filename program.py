@@ -1,3 +1,5 @@
+import numpy as np
+
 #define matrices for standard gates
 X = np.array([[0.0,1.0],[1.0,0.0]])
 Y = np.array([[0,-1.0j],[1.0j,0.0]])
