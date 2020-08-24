@@ -4,26 +4,6 @@ import matplotlib.pyplot as plt
 import program
 from ds_compiler import ds_compile
 
-#IBM imports 
-import qiskit as qk
-from qiskit.tools.monitor import job_monitor
-from qiskit.visualization import plot_histogram, plot_gate_map, plot_circuit_layout
-from qiskit import Aer, IBMQ, execute
-from qiskit.providers.aer import noise
-from qiskit.providers.aer.noise import NoiseModel
-from qiskit.circuit import quantumcircuit
-from qiskit.circuit import Instruction
-
-#Rigettti imports
-import pyquil
-from pyquil.quil import Program
-from pyquil.gates import *
-from pyquil.api import get_qc
-
-
-#Cirq imports
-import cirq
-
 
 class Heisenberg:
 
@@ -121,6 +101,8 @@ class Heisenberg:
         self.initial_spins=self.initial_spins.split(',')
 
         if "ibm" in self.backend:
+            #IBM imports 
+            import qiskit as qk
             self.qr=qk.QuantumRegister(self.num_qubits, 'q')
             self.cr=qk.ClassicalRegister(self.num_qubits, 'c')
 
@@ -422,6 +404,8 @@ class Heisenberg:
             self.generate_cirq()
 
     def connect_IBM(self,api_key=None, overwrite=False):
+        #IBM imports 
+        import qiskit as qk
         if api_key != None:
             if overwrite==False:
                 qk.IBMQ.save_account(api_key) ## only run once!
