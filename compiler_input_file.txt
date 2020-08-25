@@ -1,16 +1,7 @@
-﻿
-*JX
-0
-
-
-*JY 
-0
-
+﻿#sample input file
 
 *JZ 
 0.01183898
-
-
 
 
 *h_ext 
@@ -50,7 +41,7 @@ QS
 
 
 *device
-ibmq_16_melbourne
+ibmq_essex
 
 *noise_choice
 n

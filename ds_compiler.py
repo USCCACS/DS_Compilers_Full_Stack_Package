@@ -55,9 +55,30 @@ def ds_compile_ibm(circ_obj,shots=1):
             TH[i] = 0
             AC1[i] = 0
             AC2[i] =0
+        if name == "rx":
+            G[i] = "RX"
+            TH[i] = instr[0].params[0]
+            AC1[i] = instr[1][0].index
+            AC2[i] = 0
         i = i+1
 
 
+    #Use RX = H RZ H
+    i=0
+    while G[i]!= "MEASURE":
+        if G[i]=="RX":
+            G[i]="H"
+            intermed_angle=TH[i].copy()
+            intermed_qubit=AC1[i].copy()
+            G.insert(i,"RZ")
+            TH=np.insert(TH,i,intermed_angle)
+            AC1=np.insert(AC1,i,intermed_qubit)
+            AC2=np.insert(AC2,i,0)
+            G.insert(i,"H")
+            TH=np.insert(TH,i,0)
+            AC1=np.insert(AC1,i,intermed_qubit)
+            AC2=np.insert(AC2,i,0)
+        i=i+1
             
     #Omit last and second-to-last CNOT for each qubit
     for qub in range(0,nqubits+1):

@@ -1,8 +1,13 @@
 #import necessary libraries
 import numpy as np
-import matplotlib.pyplot as plt
 import program
 from ds_compiler import ds_compile
+import os
+
+
+
+
+
 
 
 class Heisenberg:
@@ -11,7 +16,6 @@ class Heisenberg:
         #%matplotlib inline 
         input_file=open(file,'r')
         data=input_file.readlines()
-        self.logfile=open(logfile,'w')
 
 
 
@@ -45,6 +49,13 @@ class Heisenberg:
 
         from numpy import cos as cos_func
         self.time_func=cos_func
+        current=os.getcwd()
+        newdir="Data"
+        path = os.path.join(current, newdir) 
+        if not os.path.isdir(path):
+            os.makedirs(path)
+        completename = os.path.join(path,logfile)
+        self.logfile=open(completename,'w')
 
         for i in range(len(data)-1):
             value=data[i+1].strip()
@@ -100,11 +111,7 @@ class Heisenberg:
 
         self.initial_spins=self.initial_spins.split(',')
 
-        if "ibm" in self.backend:
-            #IBM imports 
-            import qiskit as qk
-            self.qr=qk.QuantumRegister(self.num_qubits, 'q')
-            self.cr=qk.ClassicalRegister(self.num_qubits, 'c')
+
 
         self.total_time=int(self.delta_t*self.steps)
 
@@ -123,24 +130,6 @@ class Heisenberg:
                 print('Invalid spin entered')
                 self.logfile.write("Invalid spin entered\n")
 
-    def imports(self):
-        if "ibm" in self.backend:
-            import qiskit as qk
-            from qiskit.tools.monitor import job_monitor
-            from qiskit.visualization import plot_histogram, plot_gate_map, plot_circuit_layout
-            from qiskit import Aer, IBMQ, execute
-            from qiskit.providers.aer import noise
-            from qiskit.providers.aer.noise import NoiseModel
-            from qiskit.circuit import quantumcircuit
-            from qiskit.circuit import Instruction
-            self.qr = qk.QuantumRegister(self.num_qubits, 'q')
-            self.cr = qk.ClassicalRegister(self.num_qubits, 'c')
-        elif "rigetti" in self.backend:
-            import pyquil
-            from pyquil.quil import Program
-            from pyquil.gates import RX, RZ, CZ, RESET, MEASURE
-        elif "cirq" in self.backend:
-            import cirq
 
 
 
@@ -227,6 +216,8 @@ class Heisenberg:
         from qiskit.providers.aer.noise import NoiseModel
         from qiskit.circuit import quantumcircuit
         from qiskit.circuit import Instruction
+        self.qr=qk.QuantumRegister(self.num_qubits, 'q')
+        self.cr=qk.ClassicalRegister(self.num_qubits, 'c')
         #convert from local circuits to IBM-specific circuit
 
         if "y" in self.compile:
@@ -313,7 +304,10 @@ class Heisenberg:
 
     def generate_rigetti(self):
         import pyquil
-        
+        from pyquil.quil import Program
+        from pyquil.gates import H, RZ, RX, RY, CNOT, MEASURE, RESET
+        from pyquil.api import get_qc
+                
         print("Creating Pyquil program list...")
         self.logfile.write("Creating Pyquil program list...")
         for circuit in self.circuits_list:
@@ -404,7 +398,6 @@ class Heisenberg:
             self.generate_cirq()
 
     def connect_IBM(self,api_key=None, overwrite=False):
-        #IBM imports 
         import qiskit as qk
         if api_key != None:
             if overwrite==False:
@@ -455,7 +448,16 @@ class Heisenberg:
       return average_mag
 
     def run_circuits(self):
+        if "y" in self.plot_flag:
+            import matplotlib.pyplot as plt
+
         if self.backend in "ibm":
+            import qiskit as qk
+            from qiskit import Aer, IBMQ, execute
+            from qiskit.providers.aer import noise
+            from qiskit.providers.aer.noise import NoiseModel
+            from qiskit.circuit import quantumcircuit
+            from qiskit.circuit import Instruction
             ## Show available backends
             provider = qk.IBMQ.get_provider(group='open')
             provider.backends()
@@ -569,6 +571,8 @@ class Heisenberg:
                 self.result_matrix=np.stack(self.result_out_list)           
                 print("Done")
                 self.logfile.write("Done\n")
+
+
         elif "rigetti" in self.backend:
             print("Running Pyquil programs...")
             self.logfile.write("Running Pyquil programs...\n")
@@ -608,5 +612,6 @@ class Heisenberg:
                     plt.ylabel("Average Magnetization")
                     plt.savefig("Data/Result_qubit{}.png".format(i+1))
                     plt.close()
+                np.savetxt("Data/Qubit {} Average Magnetization Data.txt".format(j+1),qubit_specific_row)
             print("Done")
             self.logfile.write("Done\n")
