@@ -68,8 +68,8 @@ def ds_compile_ibm(circ_obj,shots=1):
     while G[i]!= "MEASURE":
         if G[i]=="RX":
             G[i]="H"
-            intermed_angle=TH[i].copy()
-            intermed_qubit=AC1[i].copy()
+            intermed_angle=float(TH[i].copy())
+            intermed_qubit=int(AC1[i].copy())
             G.insert(i,"RZ")
             TH=np.insert(TH,i,intermed_angle)
             AC1=np.insert(AC1,i,intermed_qubit)
