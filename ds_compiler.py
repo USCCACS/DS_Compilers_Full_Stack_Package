@@ -351,7 +351,6 @@ def ds_compile_rigetti(circ_obj,shots=1):
     nqubits=len(circ_obj.get_qubits())
     lineList = [str(instr) for instr in circ_obj]
     count = len(lineList)
-
     #Read the gate in right vector form
     # G = Gate type
     # TH = Angle of rotation ! if no angle rotation then TH = 0
@@ -378,6 +377,11 @@ def ds_compile_rigetti(circ_obj,shots=1):
         TH[i] = lineList[i][lineList[i].find("(")+1:lineList[i].find(")")]
         AC1[i] = lineList[i][-1]
         AC2[i] = 0
+      if lineList[i][0:2] == "RX":
+        G[i] = "RX"
+        TH[i] = lineList[i][lineList[i].find("(")+1:lineList[i].find(")")]
+        AC1[i] = lineList[i][-1]
+        AC2[i] = 0
       if lineList[i][0:4] == "CNOT":
         G[i] = "CNOT"
         TH[i] = 0
@@ -388,6 +392,23 @@ def ds_compile_rigetti(circ_obj,shots=1):
         TH[i] = 0
         AC1[i] = 0
         AC2[i] =0
+
+    #Use RX = H RZ H
+    i=0
+    while G[i]!= "MEASURE":
+        if G[i]=="RX":
+            G[i]="H"
+            intermed_angle=TH[i].copy()
+            intermed_qubit=AC1[i].copy()
+            G.insert(i,"RZ")
+            TH=np.insert(TH,i,intermed_angle)
+            AC1=np.insert(AC1,i,intermed_qubit)
+            AC2=np.insert(AC2,i,0)
+            G.insert(i,"H")
+            TH=np.insert(TH,i,0)
+            AC1=np.insert(AC1,i,intermed_qubit)
+            AC2=np.insert(AC2,i,0)
+        i=i+1
 
 
     # Use CNOT = H CZ H 
@@ -453,7 +474,6 @@ def ds_compile_rigetti(circ_obj,shots=1):
            if flag ==2:
               break 
       i = i + 1
-
 
 
     # Use CZ H RZ H CZ = RZ(pi/2) CZ RX(pi/2) RZ RX(-pi2) CZ RZ(-pi/2)
@@ -615,7 +635,7 @@ def ds_compile_rigetti(circ_obj,shots=1):
         i = i + 1
 
 
-    p = pyquil.Program(RESET()) #compressed program
+    p = pyquil.Program() #compressed program
     ro = p.declare('ro', memory_type='BIT', memory_size=nqubits)
 
     for i in range(len(G)):
