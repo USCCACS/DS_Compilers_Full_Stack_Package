@@ -218,6 +218,7 @@ class Heisenberg:
         from qiskit.circuit import Instruction
         self.qr=qk.QuantumRegister(self.num_qubits, 'q')
         self.cr=qk.ClassicalRegister(self.num_qubits, 'c')
+        self.ibm_circuits_list=[]
         #convert from local circuits to IBM-specific circuit
 
         if "y" in self.compile:
@@ -307,7 +308,7 @@ class Heisenberg:
         from pyquil.quil import Program
         from pyquil.gates import H, RZ, RX, RY, CNOT, MEASURE, RESET
         from pyquil.api import get_qc
-                
+        self.rigetti_circuits_list=[]
         print("Creating Pyquil program list...")
         self.logfile.write("Creating Pyquil program list...")
         for circuit in self.circuits_list:
@@ -363,6 +364,7 @@ class Heisenberg:
 
     def generate_cirq(self):
         import cirq
+        self.cirq_circuits_list=[]
         print("Creating Cirq circuit list...")
         self.logfile.write("Creating Cirq circuit list...")
         for circuit in self.circuits_list:
